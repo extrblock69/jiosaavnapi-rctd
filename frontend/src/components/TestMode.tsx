@@ -7,6 +7,7 @@ export function TestMode() {
   const [isOpen, setIsOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('Arijit Singh');
 
   const addLog = (msg: string) => {
     console.log(msg);
@@ -22,7 +23,18 @@ export function TestMode() {
       // 1. Verify API Connection
       addLog('Step 1: Verifying Backend Connection...');
       try {
-        const ping = await fetch(`${API_BASE}/search?query=ping`);
+        const pingUrl = `${API_BASE}/search?query=ping`;
+        addLog(`[RAW REQ] GET ${pingUrl}`);
+        const ping = await fetch(pingUrl);
+        addLog(`[RAW RES] Status: ${ping.status}`);
+
+        try {
+          const pingData = await ping.json();
+          addLog(`[RAW RES] Body: ${JSON.stringify(pingData, null, 2)}`);
+        } catch (err) {
+          addLog(`[RAW RES] Body: <Could not parse JSON>`);
+        }
+
         if (ping.ok) addLog('✅ Backend connection successful!');
         else throw new Error('Backend returned non-200 status');
       } catch (e: any) {
@@ -31,12 +43,17 @@ export function TestMode() {
       }
 
       // 2. Sample Search Flow
-      const query = 'Arijit Singh';
+      const query = searchQuery.trim() || 'Arijit Singh';
       addLog(`Step 2: Searching for "${query}"...`);
-      const searchRes = await fetch(`${API_BASE}/search/songs?query=${encodeURIComponent(query)}`);
+      const searchUrl = `${API_BASE}/search/songs?query=${encodeURIComponent(query)}`;
+      addLog(`[RAW REQ] GET ${searchUrl}`);
+      const searchRes = await fetch(searchUrl);
       const searchData = await searchRes.json();
 
-      if (!searchData.success || !searchData.data || searchData.data.results.length === 0) {
+      addLog(`[RAW RES] Status: ${searchRes.status}`);
+      addLog(`[RAW RES] Body: ${JSON.stringify(searchData, null, 2)}`);
+
+      if (!searchData.success || !searchData.data || searchData.data.results?.length === 0) {
         addLog('❌ No search results found or invalid response structure.');
         throw new Error('Search failed');
       }
@@ -55,8 +72,13 @@ export function TestMode() {
       // 4. Stream URL Generation
       addLog('Step 4: Fetching stream URL...');
       const linkParam = firstSong.url ? `link=${encodeURIComponent(firstSong.url)}` : `ids=${firstSong.id}`;
-      const songRes = await fetch(`${API_BASE}/songs?${linkParam}`);
+      const streamUrl = `${API_BASE}/songs?${linkParam}`;
+      addLog(`[RAW REQ] GET ${streamUrl}`);
+      const songRes = await fetch(streamUrl);
       const songData = await songRes.json();
+
+      addLog(`[RAW RES] Status: ${songRes.status}`);
+      addLog(`[RAW RES] Body: ${JSON.stringify(songData, null, 2)}`);
 
       if (!songData.success || !songData.data || songData.data.length === 0) {
         addLog('❌ Failed to fetch detailed song stream data.');
@@ -131,11 +153,22 @@ export function TestMode() {
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-800 flex justify-end">
+            <div className="p-4 border-t border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-gray-400 text-sm font-medium">Search Keyword:</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  disabled={isRunning}
+                  className="bg-black border border-gray-700 text-white px-3 py-1.5 rounded-md text-sm focus:outline-none focus:border-gray-500 w-full sm:w-64"
+                  placeholder="e.g. Arijit Singh"
+                />
+              </div>
               <button
                 onClick={runDiagnostic}
                 disabled={isRunning}
-                className="bg-white text-black px-6 py-2 rounded-md font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-white text-black px-6 py-2 rounded-md font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {isRunning ? 'Running...' : 'Run Diagnostics'}
               </button>
