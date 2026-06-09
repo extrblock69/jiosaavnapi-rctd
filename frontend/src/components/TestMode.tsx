@@ -48,10 +48,15 @@ export function TestMode() {
       const searchUrl = `${API_BASE}/search/songs?query=${encodeURIComponent(query)}`;
       addLog(`[RAW REQ] GET ${searchUrl}`);
       const searchRes = await fetch(searchUrl);
-      const searchData = await searchRes.json();
-
       addLog(`[RAW RES] Status: ${searchRes.status}`);
-      addLog(`[RAW RES] Body: ${JSON.stringify(searchData, null, 2)}`);
+
+      let searchData: any = {};
+      try {
+        searchData = await searchRes.json();
+        addLog(`[RAW RES] Body: ${JSON.stringify(searchData, null, 2)}`);
+      } catch (err) {
+        addLog(`[RAW RES] Body: <Could not parse JSON>`);
+      }
 
       if (!searchData.success || !searchData.data || searchData.data.results?.length === 0) {
         addLog('❌ No search results found or invalid response structure.');
@@ -75,10 +80,15 @@ export function TestMode() {
       const streamUrl = `${API_BASE}/songs?${linkParam}`;
       addLog(`[RAW REQ] GET ${streamUrl}`);
       const songRes = await fetch(streamUrl);
-      const songData = await songRes.json();
-
       addLog(`[RAW RES] Status: ${songRes.status}`);
-      addLog(`[RAW RES] Body: ${JSON.stringify(songData, null, 2)}`);
+
+      let songData: any = {};
+      try {
+        songData = await songRes.json();
+        addLog(`[RAW RES] Body: ${JSON.stringify(songData, null, 2)}`);
+      } catch (err) {
+        addLog(`[RAW RES] Body: <Could not parse JSON>`);
+      }
 
       if (!songData.success || !songData.data || songData.data.length === 0) {
         addLog('❌ Failed to fetch detailed song stream data.');
