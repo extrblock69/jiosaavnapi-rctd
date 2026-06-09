@@ -58,7 +58,7 @@ app.get('/api/songs', async (req: Request, res: Response) => {
 
     const result = parsedLink
       ? await songService.getSongByLink(parsedLink)
-      : await songService.getSongByIds({ songIds: ids });
+      : await songService.getSongByIds({ songIds: ids || '' });
 
     res.json({ success: true, data: result });
   } catch (error: any) {
@@ -69,7 +69,7 @@ app.get('/api/songs', async (req: Request, res: Response) => {
 app.get('/api/songs/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const result = await songService.getSongByIds({ songIds: id });
+    const result = await songService.getSongByIds({ songIds: typeof id === 'string' ? id : id[0] });
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
