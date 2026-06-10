@@ -3,6 +3,8 @@ import { SearchBar } from './components/SearchBar';
 import { SongCard } from './components/SongCard';
 import { Player } from './components/Player';
 import { TestMode } from './components/TestMode';
+import { ApiTester } from './components/ApiTester';
+import { Beaker } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api';
 
@@ -12,6 +14,7 @@ function App() {
   const [currentSong, setCurrentSong] = useState<any>(null);
   const [streamUrl, setStreamUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [showApiTester, setShowApiTester] = useState<boolean>(false);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -76,12 +79,28 @@ function App() {
     }
   };
 
+  if (showApiTester) {
+    return <ApiTester onClose={() => setShowApiTester(false)} />;
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white font-sans pb-32">
+    <div className="min-h-screen bg-black text-white font-sans pb-32 relative">
+      {/* Test Area Button */}
+      <button
+        onClick={() => setShowApiTester(true)}
+        className="absolute top-4 left-4 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition flex items-center shadow-lg border border-gray-700 group z-40"
+        title="Open API Tester Area"
+      >
+        <Beaker className="w-5 h-5" />
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap px-0 group-hover:px-2 text-sm font-medium">
+          API Tester Area
+        </span>
+      </button>
+
       {/* Header */}
       <TestMode />
 
-      {/* Header */}
+      {/* Main Header */}
       <header className="pt-16 pb-8 px-4 text-center">
         <h1 className="text-5xl font-extrabold tracking-tight mb-8">JioSaavn Web</h1>
         <SearchBar onSearch={handleSearch} isLoading={isLoading} />
