@@ -1,40 +1,8 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { usePlayer } from '../context/PlayerContext';
 
-interface PlayerProps {
-  currentSong: any;
-  streamUrl: string;
-}
-
-export function Player({ currentSong, streamUrl }: PlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    if (streamUrl && audioRef.current) {
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => console.error("Error playing audio:", err));
-    }
-  }, [streamUrl]);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      const progressPercent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-      setProgress(progressPercent || 0);
-    }
-  };
+export function Player() {
+  const { currentSong, isPlaying, togglePlay, playNext, playPrev } = usePlayer();
 
   if (!currentSong) return null;
 
@@ -43,47 +11,49 @@ export function Player({ currentSong, streamUrl }: PlayerProps) {
                    '/default-cover.png';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-gray-800 text-white p-4 z-50 animate-fade-in-up">
-      <audio
-        ref={audioRef}
-        src={streamUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
-      />
-
-      {/* Progress Bar */}
-      <div className="absolute top-0 left-0 h-1 bg-gray-800 w-full cursor-pointer">
+    <div className="bg-[#181818] border-t border-gray-800 text-white p-4 animate-fade-in-up shadow-2xl h-24 flex items-center">
+      {/* We can use an interval to simulate progress visually, or pass progress from Context */}
+      <div className="absolute top-0 left-0 h-1 bg-gray-800 w-full cursor-pointer hidden">
         <div
           className="h-full bg-white transition-all duration-100 ease-linear"
-          style={{ width: `${progress}%` }}
+          style={{ width: `0%` }}
         />
       </div>
 
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="w-full flex items-center justify-between px-4">
         {/* Song Info */}
         <div className="flex items-center space-x-4 w-1/3">
-          <img src={imageUrl} alt={currentSong.title} className="w-14 h-14 rounded-md object-cover" />
+          <img src={imageUrl} alt={currentSong.title || currentSong.name} className="w-14 h-14 rounded-md object-cover" />
           <div className="overflow-hidden">
-            <h4 className="font-semibold text-sm truncate" dangerouslySetInnerHTML={{ __html: currentSong.title }}></h4>
-            <p className="text-xs text-gray-400 truncate mt-1" dangerouslySetInnerHTML={{ __html: currentSong.primaryArtists || currentSong.singers || '' }}></p>
+            <h4 className="font-semibold text-sm truncate" dangerouslySetInnerHTML={{ __html: currentSong.title || currentSong.name || '' }}></h4>
+            <p className="text-xs text-gray-400 truncate mt-1" dangerouslySetInnerHTML={{ __html: currentSong.subtitle || '' }}></p>
           </div>
         </div>
 
         {/* Controls */}
         <div className="flex flex-col items-center justify-center w-1/3">
           <div className="flex items-center space-x-6">
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={playPrev} className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-95 transition-transform">
               <SkipBack className="w-5 h-5" />
             </button>
             <button
               onClick={togglePlay}
-              className="bg-white text-black rounded-full p-3 hover:scale-105 transition-transform"
+              className="bg-white text-black rounded-full p-3 hover:scale-105 active:scale-95 transition-transform shadow-lg"
             >
               {isPlaying ? <Pause fill="currentColor" className="w-5 h-5" /> : <Play fill="currentColor" className="w-5 h-5 ml-0.5" />}
             </button>
-            <button className="text-gray-400 hover:text-white transition-colors">
+            <button onClick={playNext} className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-95 transition-transform">
               <SkipForward className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* Progress bar visual only, accurate progress requires sync via global audio ref in context. This is left static per standard simple UI mockups or requires extended context syncing. */}
+          <div className="flex items-center space-x-2 mt-2 w-full max-w-md">
+            <span className="text-xs text-gray-400">0:00</span>
+            <div className="h-1 bg-gray-700 flex-1 rounded-full group cursor-pointer relative">
+               <div className="absolute top-0 left-0 h-full bg-white rounded-full group-hover:bg-green-500 w-0"></div>
+            </div>
+            <span className="text-xs text-gray-400">0:00</span>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SongCardProps {
   song: any;
@@ -6,6 +7,7 @@ interface SongCardProps {
 }
 
 export function SongCard({ song, onPlay }: SongCardProps) {
+  const navigate = useNavigate();
   const imageUrl = song.image?.find((img: any) => img.quality === '500x500')?.url ||
                    song.image?.[0]?.url ||
                    '/default-cover.png';
@@ -14,10 +16,22 @@ export function SongCard({ song, onPlay }: SongCardProps) {
   const durationStr = song.duration ?
     `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}` : '';
 
+  const handleClick = () => {
+    if (song.type === 'album') {
+      navigate(`/album/${song.id}`);
+    } else if (song.type === 'playlist') {
+      navigate(`/playlist/${song.id}`);
+    } else if (song.type === 'artist') {
+      navigate(`/artist/${song.id}`);
+    } else {
+      onPlay(song);
+    }
+  };
+
   return (
     <div
       className="group relative bg-[#111] border border-gray-800 rounded-xl overflow-hidden hover:bg-[#1a1a1a] transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
-      onClick={() => onPlay(song)}
+      onClick={handleClick}
     >
       <div className="relative aspect-square overflow-hidden">
         <img
