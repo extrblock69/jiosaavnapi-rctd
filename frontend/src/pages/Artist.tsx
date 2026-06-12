@@ -33,9 +33,57 @@ export function Artist() {
   if (isLoading) return <div className="p-8 text-gray-400">Loading artist...</div>;
   if (!artist) return <div className="p-8 text-red-400">Artist not found.</div>;
 
+  const [songs, setSongs] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<any[]>([]);
+  const [songPage, setSongPage] = useState(0);
+  const [albumPage, setAlbumPage] = useState(0);
+  const [loadingSongs, setLoadingSongs] = useState(false);
+  const [loadingAlbums, setLoadingAlbums] = useState(false);
+
+  useEffect(() => {
+    if (artist) {
+      setSongs(artist.topSongs || []);
+      setAlbums(artist.topAlbums || []);
+    }
+  }, [artist]);
+
+  const loadMoreSongs = async () => {
+    if (!id) return;
+    setLoadingSongs(true);
+    try {
+      const nextPage = songPage + 1;
+      const res = await fetch(`${API_BASE}/artists/${id}/songs?page=${nextPage}`);
+      const data = await res.json();
+      if (data.success && data.data && data.data.results) {
+        setSongs(prev => [...prev, ...data.data.results]);
+        setSongPage(nextPage);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSongs(false);
+    }
+  };
+
+  const loadMoreAlbums = async () => {
+    if (!id) return;
+    setLoadingAlbums(true);
+    try {
+      const nextPage = albumPage + 1;
+      const res = await fetch(`${API_BASE}/artists/${id}/albums?page=${nextPage}`);
+      const data = await res.json();
+      if (data.success && data.data && data.data.results) {
+        setAlbums(prev => [...prev, ...data.data.results]);
+        setAlbumPage(nextPage);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingAlbums(false);
+    }
+  };
+
   const imageUrl = artist.image?.[2]?.url || artist.image?.[0]?.url || '/default-cover.png';
-  const topSongs = artist.topSongs || [];
-  const topAlbums = artist.topAlbums || [];
 
   return (
     <div className="flex flex-col">
@@ -52,7 +100,7 @@ export function Artist() {
 
       <div className="px-8 py-4">
         <button
-          onClick={() => topSongs.length > 0 && playSong(topSongs[0], topSongs)}
+          onClick={() => songs.length > 0 && playSong(songs[0], songs)}
           className="bg-green-500 text-black rounded-full p-4 hover:scale-105 transition shadow-xl"
         >
           <Play className="w-8 h-8 ml-1" fill="currentColor" />
@@ -60,16 +108,16 @@ export function Artist() {
       </div>
 
       <div className="px-8 pb-8">
-        <h2 className="text-2xl font-bold mb-6 mt-4">Popular Songs</h2>
-        <div className="space-y-1 mb-10">
-          {topSongs.map((song: any, idx: number) => {
+        <h2 className="text-2xl font-bold mb-6 mt-4">Songs</h2>
+        <div className="space-y-1 mb-6">
+          {songs.map((song: any, idx: number) => {
             const songImg = song.image?.[0]?.url || '/default-cover.png';
             const duration = song.duration ? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}` : '-:--';
 
             return (
               <div
-                key={song.id}
-                onClick={() => playSong(song, topSongs)}
+                key={song.id + idx}
+                onClick={() => playSong(song, songs)}
                 className="grid grid-cols-[16px_minmax(0,1fr)_1fr_minmax(120px,100px)] items-center gap-4 px-4 py-2 hover:bg-gray-800/50 rounded-md cursor-pointer group transition"
               >
                 <span className="text-gray-400 group-hover:hidden">{idx + 1}</span>
@@ -87,17 +135,31 @@ export function Artist() {
           })}
         </div>
 
-        {topAlbums.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Popular Albums</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              {topAlbums.map((album: any, idx: number) => (
-                <div key={album.id || idx} className="animate-slide-up" style={{ animationDelay: `${idx * 0.05}s` }}>
-                  {/* Reuse SongCard for albums visually, passing empty play func as we aren't handling album clicks to player directly here without a wrapper */}
+        {songs.length >= 5 && (
+          <div className="flex justify-center mb-12">
+            <button onClick={loadMoreSongs} disabled={loadingSongs} className="text-sm font-bold uppercase tracking-wider text-gray-400 hover:text-white border border-gray-600 hover:border-white rounded-full px-6 py-2 transition disabled:opacity-50">
+              {loadingSongs ? 'Loading...' : 'Load More Songs'}
+            </button>
+          </div>
+        )}
+
+        {albums.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Albums</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 mb-6">
+              {albums.map((album: any, idx: number) => (
+                <div key={album.id + idx} className="animate-slide-up" style={{ animationDelay: `${idx * 0.05}s` }}>
                   <SongCard song={album} onPlay={() => {}} />
                 </div>
               ))}
             </div>
+            {albums.length >= 5 && (
+              <div className="flex justify-center">
+                <button onClick={loadMoreAlbums} disabled={loadingAlbums} className="text-sm font-bold uppercase tracking-wider text-gray-400 hover:text-white border border-gray-600 hover:border-white rounded-full px-6 py-2 transition disabled:opacity-50">
+                  {loadingAlbums ? 'Loading...' : 'Load More Albums'}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import { Search } from './pages/Search';
 import { Album } from './pages/Album';
 import { Playlist } from './pages/Playlist';
 import { Artist } from './pages/Artist';
+import { SongPage } from './pages/SongPage';
 import { ApiTester } from './components/ApiTester';
 import { Beaker } from 'lucide-react';
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/album/:id" element={<Album />} />
             <Route path="/playlist/:id" element={<Playlist />} />
             <Route path="/artist/:id" element={<Artist />} />
+            <Route path="/song/:id" element={<SongPage />} />
           </Routes>
         </MainLayout>
       </div>

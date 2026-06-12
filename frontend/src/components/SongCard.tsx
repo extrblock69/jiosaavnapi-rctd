@@ -16,13 +16,22 @@ export function SongCard({ song, onPlay }: SongCardProps) {
   const durationStr = song.duration ?
     `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}` : '';
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // If clicking the play button overlay, just play it
+    if ((e.target as HTMLElement).closest('.play-btn-overlay')) {
+      onPlay(song);
+      return;
+    }
+
     if (song.type === 'album') {
       navigate(`/album/${song.id}`);
     } else if (song.type === 'playlist') {
       navigate(`/playlist/${song.id}`);
     } else if (song.type === 'artist') {
       navigate(`/artist/${song.id}`);
+    } else if (song.type === 'song' || song.id) {
+      // By default navigate to song page if it's a song, users can click the play overlay to play directly
+      navigate(`/song/${song.id}`);
     } else {
       onPlay(song);
     }
@@ -40,8 +49,8 @@ export function SongCard({ song, onPlay }: SongCardProps) {
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="bg-white text-black rounded-full p-4 transform scale-90 group-hover:scale-100 transition-transform duration-300">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center play-btn-overlay">
+          <div className="bg-white text-black rounded-full p-4 transform scale-90 group-hover:scale-100 transition-transform duration-300 hover:scale-110">
             <Play fill="currentColor" className="w-6 h-6 ml-1" />
           </div>
         </div>
