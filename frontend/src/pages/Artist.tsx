@@ -12,6 +12,13 @@ export function Artist() {
   const [artist, setArtist] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [songs, setSongs] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<any[]>([]);
+  const [songPage, setSongPage] = useState(0);
+  const [albumPage, setAlbumPage] = useState(0);
+  const [loadingSongs, setLoadingSongs] = useState(false);
+  const [loadingAlbums, setLoadingAlbums] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     const fetchArtist = async () => {
@@ -30,22 +37,15 @@ export function Artist() {
     fetchArtist();
   }, [id]);
 
-  if (isLoading) return <div className="p-8 text-gray-400">Loading artist...</div>;
-  if (!artist) return <div className="p-8 text-red-400">Artist not found.</div>;
-
-  const [songs, setSongs] = useState<any[]>([]);
-  const [albums, setAlbums] = useState<any[]>([]);
-  const [songPage, setSongPage] = useState(0);
-  const [albumPage, setAlbumPage] = useState(0);
-  const [loadingSongs, setLoadingSongs] = useState(false);
-  const [loadingAlbums, setLoadingAlbums] = useState(false);
-
   useEffect(() => {
     if (artist) {
       setSongs(artist.topSongs || []);
       setAlbums(artist.topAlbums || []);
     }
   }, [artist]);
+
+  if (isLoading) return <div className="p-8 text-gray-400">Loading artist...</div>;
+  if (!artist) return <div className="p-8 text-red-400">Artist not found.</div>;
 
   const loadMoreSongs = async () => {
     if (!id) return;
