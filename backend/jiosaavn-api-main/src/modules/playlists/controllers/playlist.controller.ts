@@ -39,7 +39,9 @@ export class PlaylistController implements Routes {
                   /(?:jiosaavn\.com|saavn\.com)\/(?:featured|s\/playlist)\/[^/]+\/([^/]+)$|\/([^/]+)$/
                 )
                 const filteredMatches = matches?.filter((each) => each !== undefined)
-                return (filteredMatches && filteredMatches[filteredMatches?.length - 1 || 0]) || undefined
+                const token = (filteredMatches && filteredMatches[filteredMatches?.length - 1 || 0]) || undefined
+                if (token) return token
+                return value // Return original URL if no match, let the service handle it or fail gracefully
               })
               .openapi({
                 title: 'Playlist Link',

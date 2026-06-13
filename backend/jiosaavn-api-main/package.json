@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "description": "Unofficial JioSaavn API",
   "type": "module",
+  "keywords": [],
   "license": "MIT",
+  "homepage": "https://github.com/sumitkolhe/jiosaavn-api#readme",
+  "bugs": {
+    "url": "https://github.com/sumitkolhe/jiosaavn-api/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sumitkolhe/jiosaavn-api.git"
@@ -83,10 +88,5 @@
     "typescript": "^5.8.2",
     "vitest": "^3.0.9",
     "wrangler": "^4.6.0"
-  },
-  "keywords": [],
-  "bugs": {
-    "url": "https://github.com/sumitkolhe/jiosaavn-api/issues"
-  },
-  "homepage": "https://github.com/sumitkolhe/jiosaavn-api#readme"
+  }
 }
