@@ -1,29 +1,68 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Search, Library, Music2 } from 'lucide-react';
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const links = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/search', icon: Search, label: 'Search' },
   ];
 
-  const handleImportLink = () => {
+  const handleImportLink = async () => {
     const url = prompt("Paste a JioSaavn Link (Song, Album, Playlist, or Artist):");
     if (!url) return;
 
-    // Very basic client-side routing based on URL structure
-    if (url.includes('/song/')) {
-      // The API's /songs?link= handles extraction, but we need the ID to route locally.
-      // Easiest is to send user to a generic loader or let them play directly.
-      // But for a full clone, we can try to extract the token and route to search.
-      // For now, let's just trigger a search with the full link as query which our API might handle,
-      // or we can just redirect to search page. Let's redirect to search.
-      window.location.href = `/search?q=${encodeURIComponent(url)}`;
-    } else {
-      window.location.href = `/search?q=${encodeURIComponent(url)}`;
+    try {
+      if (url.includes('/song/')) {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'}/songs?link=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        if (data.success && data.data && data.data.length > 0) {
+          navigate(`/song/${data.data[0].id}`);
+          return;
+        }
+      } else if (url.includes('/album/')) {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'}/albums?link=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          navigate(`/album/${data.data.id}`);
+          return;
+        }
+      } else if (url.includes('/artist/')) {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'}/artists?link=${encodeURIComponent(url)}`);
+        const data = await response.json();
+
+        // Handle empty metadata fallback
+        if (data.success && data.data && data.data.name === '') {
+            // Fallback: search the artist name from the URL
+            const urlMatch = url.match(/artist\/([^/]+)\//);
+            let query = urlMatch ? urlMatch[1].replace(/-/g, ' ') : url;
+            query = query.replace(/ songs/gi, '');
+            const searchRes = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'}/search/artists?query=${encodeURIComponent(query)}&limit=1`);
+            const searchData = await searchRes.json();
+            if (searchData.success && searchData.data && searchData.data.results.length > 0) {
+               navigate(`/artist/${searchData.data.results[0].id}`);
+               return;
+            }
+        } else if (data.success && data.data && data.data.id) {
+          navigate(`/artist/${data.data.id}`);
+          return;
+        }
+      } else if (url.includes('/featured/') || url.includes('/playlist/')) {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'}/playlists?link=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          navigate(`/playlist/${data.data.id}`);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error("Error importing link:", e);
     }
+
+    // Fallback to global search if it fails to resolve
+    navigate(`/search?q=${encodeURIComponent(url)}`);
   };
 
   return (

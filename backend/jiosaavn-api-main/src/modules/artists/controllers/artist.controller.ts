@@ -34,7 +34,11 @@ export class ArtistController implements Routes {
               .string()
               .url()
               .optional()
-              .transform((value) => value?.match(/jiosaavn\.com\/artist\/[^/]+\/([^/]+)$/)?.[1])
+              .transform((value) => {
+                const match = value?.match(/jiosaavn\.com\/artist\/[^/]+\/([^/]+)$/)
+                if (match) return match[1]
+                return value // Return original URL if no match, let the service handle it or fail gracefully
+              })
               .openapi({
                 title: 'Artist Link',
                 description: 'A direct link to the artist on JioSaavn',
@@ -105,9 +109,25 @@ export class ArtistController implements Routes {
           albumCount = 10
         } = ctx.req.valid('query')
 
-        const response = link
-          ? await this.artistService.getArtistByLink({ token: link, page, songCount, albumCount, sortBy, sortOrder })
-          : await this.artistService.getArtistById({ artistId: id!, page, songCount, albumCount, sortBy, sortOrder })
+        let response = null
+        let token = link || ''
+
+        if (link) {
+          const match = link.match(/jiosaavn\.com\/artist\/[^/]+\/([^/]+)$/)
+          if (match) {
+            token = match[1]
+          }
+          response = await this.artistService.getArtistByLink({ token, page, songCount, albumCount, sortBy, sortOrder })
+        } else {
+          response = await this.artistService.getArtistById({
+            artistId: id!,
+            page,
+            songCount,
+            albumCount,
+            sortBy,
+            sortOrder
+          })
+        }
 
         return ctx.json({ success: true, data: response })
       }

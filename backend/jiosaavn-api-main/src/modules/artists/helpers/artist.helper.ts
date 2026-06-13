@@ -24,7 +24,7 @@ export const createArtistPayload = (artist: z.infer<typeof ArtistAPIResponseMode
   fb: artist.fb || null,
   twitter: artist.twitter || null,
   wiki: artist.wiki || null,
-  availableLanguages: artist.availableLanguages || null,
+  availableLanguages: artist.availableLanguages || [],
   isRadioPresent: artist.isRadioPresent || null,
   image: createImageLinks(artist.image),
   topSongs: artist.topSongs?.map(createSongPayload) || null,
