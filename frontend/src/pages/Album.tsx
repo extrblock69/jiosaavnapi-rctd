@@ -36,10 +36,10 @@ export function Album() {
   const songs = album.songs || [];
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col animate-fade-in">
       {/* Header */}
-      <div className="bg-gradient-to-b from-gray-700 to-[#121212] p-8 flex items-end gap-6 pt-24">
-        <img src={imageUrl} alt={album.title || album.name} className="w-52 h-52 shadow-2xl rounded-md object-cover" />
+      <div className="bg-gradient-to-b from-blue-900/80 to-[#121212] p-8 flex items-end gap-6 pt-32">
+        <img src={imageUrl} alt={album.name} className="w-52 h-52 shadow-2xl rounded-md object-cover hover:scale-105 transition-transform duration-500" />
         <div className="flex flex-col">
           <span className="text-sm font-bold uppercase tracking-wider mb-2">Album</span>
           <h1 className="text-5xl font-extrabold mb-4" dangerouslySetInnerHTML={{ __html: album.title || album.name || '' }}></h1>
@@ -78,7 +78,7 @@ export function Album() {
               <div
                 key={song.id}
                 onClick={() => playSong(song, songs)}
-                className="grid grid-cols-[16px_minmax(0,1fr)_1fr_minmax(120px,100px)] items-center gap-4 px-4 py-2 hover:bg-gray-800/50 rounded-md cursor-pointer group transition"
+                className="grid grid-cols-[16px_minmax(0,1fr)_minmax(120px,100px)] items-center gap-4 px-4 py-2 hover:bg-gray-800/50 rounded-md cursor-pointer group transition-colors"
               >
                 <span className="text-gray-400 group-hover:hidden">{idx + 1}</span>
                 <Play className="w-4 h-4 text-white hidden group-hover:block" fill="currentColor" />

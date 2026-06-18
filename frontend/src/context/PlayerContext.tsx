@@ -19,11 +19,16 @@ interface PlayerContextType {
   queue: Song[];
   isPlaying: boolean;
   streamUrl: string;
+  progress: number;
+  duration: number;
+  volume: number;
   playSong: (song: Song, newQueue?: Song[]) => void;
   playNext: () => void;
   playPrev: () => void;
   togglePlay: () => void;
   addToQueue: (song: Song) => void;
+  seekTo: (time: number) => void;
+  setVolume: (vol: number) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -40,6 +45,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [queueIndex, setQueueIndex] = useState<number>(-1);
   const [streamUrl, setStreamUrl] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [volume, setVolumeState] = useState<number>(1);
 
   // Audio element ref (we manage it here to keep it global across routes)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -183,6 +191,20 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setQueue(prev => [...prev, song]);
   };
 
+  const seekTo = (time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setProgress(time);
+    }
+  };
+
+  const setVolume = (vol: number) => {
+    if (audioRef.current) {
+      audioRef.current.volume = vol;
+      setVolumeState(vol);
+    }
+  };
+
   // Sync state with audio element for UI (optional, can be expanded for progress bar)
   useEffect(() => {
     const audio = audioRef.current;
@@ -190,18 +212,24 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     const handlePause = () => setIsPlaying(false);
     const handlePlay = () => setIsPlaying(true);
+    const handleTimeUpdate = () => setProgress(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
 
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('play', handlePlay);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, []);
 
   return (
-    <PlayerContext.Provider value={{ currentSong, queue, isPlaying, streamUrl, playSong, playNext, playPrev, togglePlay, addToQueue }}>
+    <PlayerContext.Provider value={{ currentSong, queue, isPlaying, streamUrl, progress, duration, volume, playSong, playNext, playPrev, togglePlay, addToQueue, seekTo, setVolume }}>
       {children}
     </PlayerContext.Provider>
   );

@@ -60,9 +60,9 @@ export function SongPage() {
   const imageUrl = song.image?.find((i:any) => i.quality === '500x500')?.url || song.image?.[2]?.url || song.image?.[0]?.url || '/default-cover.png';
 
   return (
-    <div className="flex flex-col">
-      <div className="bg-gradient-to-b from-indigo-900 to-[#121212] p-8 flex flex-col md:flex-row items-end gap-6 pt-24">
-        <img src={imageUrl} alt={song.title || song.name} className="w-52 h-52 shadow-2xl rounded-md object-cover" />
+    <div className="flex flex-col animate-fade-in">
+      <div className="bg-gradient-to-b from-indigo-900/80 to-[#121212] p-8 flex flex-col md:flex-row items-end gap-6 pt-24">
+        <img src={imageUrl} alt={song.title || song.name} className="w-52 h-52 shadow-2xl rounded-md object-cover hover:scale-105 transition-transform duration-500" />
         <div className="flex flex-col">
           <span className="text-sm font-bold uppercase tracking-wider mb-2">Song</span>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4" dangerouslySetInnerHTML={{ __html: song.title || song.name || '' }}></h1>
