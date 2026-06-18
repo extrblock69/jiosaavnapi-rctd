@@ -86,9 +86,9 @@ export function Artist() {
   const imageUrl = artist.image?.[2]?.url || artist.image?.[0]?.url || '/default-cover.png';
 
   return (
-    <div className="flex flex-col">
-      <div className="bg-gradient-to-b from-purple-900 to-[#121212] p-8 flex items-end gap-6 pt-32">
-        <img src={imageUrl} alt={artist.name} className="w-52 h-52 shadow-2xl rounded-full object-cover" />
+    <div className="flex flex-col animate-fade-in">
+      <div className="bg-gradient-to-b from-purple-900/80 to-[#121212] p-8 flex items-end gap-6 pt-32">
+        <img src={imageUrl} alt={artist.name} className="w-52 h-52 shadow-2xl rounded-full object-cover hover:scale-105 transition-transform duration-500" />
         <div className="flex flex-col">
           <span className="text-sm font-bold uppercase tracking-wider mb-2">Artist</span>
           <h1 className="text-6xl font-extrabold mb-4" dangerouslySetInnerHTML={{ __html: artist.name || '' }}></h1>

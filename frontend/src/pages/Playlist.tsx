@@ -36,9 +36,9 @@ export function Playlist() {
   const songs = playlist.songs || [];
 
   return (
-    <div className="flex flex-col">
-      <div className="bg-gradient-to-b from-blue-900 to-[#121212] p-8 flex items-end gap-6 pt-24">
-        <img src={imageUrl} alt={playlist.title} className="w-52 h-52 shadow-2xl rounded-md object-cover" />
+    <div className="flex flex-col animate-fade-in">
+      <div className="bg-gradient-to-b from-blue-900/80 to-[#121212] p-8 flex items-end gap-6 pt-24">
+        <img src={imageUrl} alt={playlist.title || playlist.name} className="w-52 h-52 shadow-2xl rounded-md object-cover hover:scale-105 transition-transform duration-500" />
         <div className="flex flex-col">
           <span className="text-sm font-bold uppercase tracking-wider mb-2">Playlist</span>
           <h1 className="text-5xl font-extrabold mb-4" dangerouslySetInnerHTML={{ __html: playlist.title || playlist.name || '' }}></h1>
